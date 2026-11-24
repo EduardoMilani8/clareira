@@ -30,6 +30,12 @@ LIMITE_VERMELHO_PCT: dict[TipoChecagem, float] = {
 }
 
 
+# Interseções menores que isso (em ha E em %) são tratadas como ruído de borda.
+# Referência: a menor área mapeada pelo DETER é ~3 ha; pelo PRODES, 6,25 ha.
+TOLERANCIA_HA = 0.5
+TOLERANCIA_PCT = 0.1
+
+
 def percentual(ha_afetado: float, area_projeto_ha: float) -> float:
     if area_projeto_ha <= 0:
         raise ValueError("A área do projeto precisa ser maior que zero.")
@@ -44,10 +50,14 @@ def classificar(ha_afetado: float, area_projeto_ha: float, limite_vermelho_pct: 
       - AMARELO  se há área afetada, mas abaixo de `limite_vermelho_pct` % do projeto
       - VERMELHO se a área afetada é >= `limite_vermelho_pct` % do projeto
 
-    TODO(você): implementar. Ponto de decisão: o que é "não há área afetada"?
-    Bases diferentes são digitalizadas em escalas diferentes, então a borda de uma
-    TI e a de um projeto vizinho quase nunca batem perfeitamente, e a interseção
-    pode dar 0,003 ha de "lasca" sem significado. Compare `ha_afetado == 0` com
-    uma tolerância mínima (em ha e/ou em %) e escolha.
+    "Não há área afetada" inclui o ruído de borda: bases digitalizadas em escalas
+    diferentes quase nunca coincidem, e a interseção gera "lascas" minúsculas.
+    Só é ruído se for pequeno nos DOIS sentidos (ha e %): assim um projeto pequeno
+    não esconde um sinal real (0,4 ha em 100 ha = 0,4% continua amarelo).
     """
-    raise NotImplementedError
+    pct = percentual(ha_afetado, area_projeto_ha)
+    if ha_afetado < TOLERANCIA_HA and pct < TOLERANCIA_PCT:
+        return Nivel.VERDE
+    if pct >= limite_vermelho_pct:
+        return Nivel.VERMELHO
+    return Nivel.AMARELO
