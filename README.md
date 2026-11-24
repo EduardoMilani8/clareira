@@ -45,16 +45,31 @@ Requisitos: Docker e [uv](https://docs.astral.sh/uv/).
 docker compose up -d                       # PostGIS na porta 5433
 uv sync
 uv run python scripts/ingest/todas.py      # baixa e carrega as bases (região padrão: Lábrea/AM)
+uv run python scripts/demo/gerar_areas.py  # (opcional) regera áreas de demo e projetos fictícios
 uv run pytest
 ```
 
 Para usar outra região, defina `CLAREIRA_MUNICIPIO_IBGE` com o código IBGE de um município da Amazônia Legal.
+
+## Áreas de demonstração
+
+Em `data/demo/` (Lábrea/AM). Use-as no upload da tela:
+
+| Arquivo | Data de início | Sinais esperados |
+|---|---|---|
+| `1_area_limpa.geojson` | 2019-01-01 | todos verdes |
+| `2_desmatamento_e_dupla_contagem.geojson` | 2020-01-01 | desmatamento 🔴 (~68%), outro projeto 🔴 (~9%) |
+| `3_sobreposicao_uc.geojson` | 2021-03-01 | UC 🔴 (~27%, Flona do Iquiri) |
+
+Os projetos em `data/exemplos/projetos_carbono.geojson` são **fictícios** (prefixo `EXEMPLO-`).
 
 ## Estrutura
 
 ```
 db/init/            esquema PostGIS (roda na criação do container)
 scripts/ingest/     um script idempotente por base pública
+scripts/demo/       gerador das áreas de demo e dos projetos fictícios
+data/demo/          áreas de demonstração (GeoJSON)
 src/clareira/
   domain/           regras do semáforo (sem banco, sem HTTP)
 tests/
