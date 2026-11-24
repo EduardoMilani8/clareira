@@ -1,0 +1,36 @@
+[project]
+name = "clareira"
+version = "0.1.0"
+description = "Sinais de risco de créditos de carbono a partir de dados públicos de satélite"
+authors = [
+    { name = "Eduardo Milani", email = "eduardomilani432@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.165.0",
+    "geoalchemy2>=0.21.0",
+    "geopandas>=1.2.0",
+    "httpx>=0.28.1",
+    "psycopg[binary]>=3.3.9",
+    "pydantic-settings>=2.16.3",
+    "pyogrio>=0.13.0",
+    "shapely>=2.2.0",
+    "sqlalchemy>=2.1.9",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
