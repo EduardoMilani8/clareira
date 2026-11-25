@@ -46,8 +46,19 @@ docker compose up -d                       # PostGIS na porta 5433
 uv sync
 uv run python scripts/ingest/todas.py      # baixa e carrega as bases (região padrão: Lábrea/AM)
 uv run python scripts/demo/gerar_areas.py  # (opcional) regera áreas de demo e projetos fictícios
-uv run pytest
+uv run pytest                              # unitários + integração (precisa do banco)
+uv run uvicorn clareira.api:app --reload   # API em http://localhost:8000 (docs em /docs)
 ```
+
+## API
+
+| Método | Rota | O que faz |
+|---|---|---|
+| `POST` | `/api/analises` | recebe `{geometria: GeoJSON, data_inicio: "AAAA-MM-DD", codigo_projeto?}` e devolve os 3 sinais |
+| `GET` | `/api/analises/{id}` | reabre uma análise salva |
+| `GET` | `/api/fontes` | bases carregadas e data de atualização de cada uma |
+
+Áreas fora da região com dados carregados são **recusadas** (HTTP 422): sem dados, "nenhum sinal" não teria significado.
 
 Para usar outra região, defina `CLAREIRA_MUNICIPIO_IBGE` com o código IBGE de um município da Amazônia Legal.
 
@@ -71,6 +82,10 @@ scripts/ingest/     um script idempotente por base pública
 scripts/demo/       gerador das áreas de demo e dos projetos fictícios
 data/demo/          áreas de demonstração (GeoJSON)
 src/clareira/
-  domain/           regras do semáforo (sem banco, sem HTTP)
-tests/
+  domain/           modelos e regras do semáforo (sem banco, sem HTTP)
+  ports.py          interfaces que o serviço precisa (repositório geográfico, análises)
+  servico.py        caso de uso: valida a área, roda as 3 checagens, monta os sinais
+  adapters/         PostGIS (consultas SQL das checagens)
+  api.py            FastAPI
+tests/              serviço com repositório falso, API, integração com PostGIS
 ```

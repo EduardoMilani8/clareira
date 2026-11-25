@@ -35,3 +35,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

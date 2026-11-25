@@ -11,7 +11,9 @@ def main() -> None:
     print("DETER")
     reg = regiao()
     gdf = wfs_terrabrasilis(
-        "deter-amz:deter_amz", DADOS / f"deter_{MUNICIPIO_IBGE}.geojson", bbox=tuple(reg.total_bounds)
+        "deter-amz:deter_amz",
+        DADOS / f"deter_{MUNICIPIO_IBGE}.geojson",
+        bbox=tuple(reg.total_bounds),
     )
     gdf = recortar(gdf, reg)
     gdf = gdf[gdf["classname"].isin(CLASSES)]

@@ -23,7 +23,12 @@ def main() -> None:
     carregar(
         gdf,
         "projetos_carbono",
-        {"codigo": "codigo", "nome": "nome", "data_inicio": "data_inicio::date", "ficticio": "true"},
+        {
+            "codigo": "codigo",
+            "nome": "nome",
+            "data_inicio": "data_inicio::date",
+            "ficticio": "true",
+        },
         fonte,
     )
 
