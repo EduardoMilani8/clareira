@@ -47,6 +47,11 @@ def test_data_malformada_vira_422():
     assert r.status_code == 422
 
 
+def test_cobertura():
+    r = cliente().get("/api/cobertura")
+    assert r.status_code == 200 and r.json()["features"][0]["properties"]["nome"] == "Teste"
+
+
 def test_fontes():
     r = cliente().get("/api/fontes")
     assert r.status_code == 200

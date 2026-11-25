@@ -117,6 +117,18 @@ class RepositorioPostgis:
         with self.engine.connect() as con:
             return [Fonte(**r._mapping) for r in con.execute(text(sql))]
 
+    def cobertura(self) -> dict:
+        sql = """
+        SELECT json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(
+                 json_build_object('type', 'Feature',
+                   'properties', json_build_object('id', id, 'nome', nome),
+                   'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom, 0.001), 5)::json)),
+               '[]'::json))
+          FROM cobertura
+        """
+        with self.engine.connect() as con:
+            return con.execute(text(sql)).scalar()
+
     def _sobreposicao(self, sql: str, geometria: dict, **params) -> Sobreposicao:
         with self.engine.connect() as con:
             r = con.execute(text(sql), {"g": json.dumps(geometria), **params}).one()

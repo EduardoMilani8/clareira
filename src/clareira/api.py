@@ -20,7 +20,9 @@ AVISO_LEGAL = (
     "Sinais automáticos a partir de dados públicos. "
     "Não constituem conclusão sobre a regularidade do projeto."
 )
-FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
+RAIZ = Path(__file__).resolve().parents[2]
+FRONTEND = RAIZ / "frontend"
+DEMO = RAIZ / "data" / "demo"
 
 
 class PedidoAnalise(BaseModel):
@@ -71,10 +73,16 @@ def criar_app(servico: ServicoAnalise) -> FastAPI:
             for f in servico.fontes()
         ]
 
+    @app.get("/api/cobertura")
+    def cobertura() -> dict:
+        return servico.cobertura()
+
     @app.get("/api/saude")
     def saude() -> dict:
         return {"ok": True}
 
+    if DEMO.is_dir():
+        app.mount("/demo", StaticFiles(directory=DEMO), name="demo")
     if FRONTEND.is_dir():
         app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")
 

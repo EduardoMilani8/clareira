@@ -29,6 +29,10 @@ class RepositorioGeografico(Protocol):
 
     def fontes(self) -> list[Fonte]: ...
 
+    def cobertura(self) -> dict:
+        """GeoJSON (FeatureCollection) da região com dados carregados."""
+        ...
+
 
 class RepositorioAnalises(Protocol):
     def salvar(self, analise: Analise) -> None: ...

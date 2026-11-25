@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clareira: sinais de risco de créditos de carbono</title>
+  <meta name="description" content="Confira a área de um projeto de crédito de carbono contra dados públicos de satélite antes de comprar.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='15' fill='%230F2A22'/><circle cx='16' cy='16' r='7' fill='%23E6EFE9'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <main class="app">
+    <aside class="painel" aria-label="Análise da área">
+      <header class="marca">
+        <h1>Clareira</h1>
+        <p>Antes de comprar um crédito de carbono, veja o que os dados públicos de satélite mostram sobre a área do projeto.</p>
+      </header>
+
+      <form id="form" class="form" novalidate>
+        <fieldset class="bloco">
+          <legend>Área do projeto</legend>
+          <div class="acoes-area">
+            <button type="button" id="btn-desenhar" class="btn-sec">Desenhar no mapa</button>
+            <label class="btn-sec arquivo">
+              Enviar KML ou GeoJSON
+              <input type="file" id="arquivo" accept=".kml,.geojson,.json,application/vnd.google-earth.kml+xml,application/geo+json">
+            </label>
+          </div>
+          <p class="exemplos-titulo" id="exemplos-titulo">Ou experimente uma área de exemplo em Lábrea (AM):</p>
+          <div class="exemplos" role="group" aria-labelledby="exemplos-titulo">
+            <button type="button" class="exemplo" data-demo="1_area_limpa">Sem sinais</button>
+            <button type="button" class="exemplo" data-demo="2_desmatamento_e_dupla_contagem">Desmatamento e outro projeto</button>
+            <button type="button" class="exemplo" data-demo="3_sobreposicao_uc">Unidade de Conservação</button>
+          </div>
+          <p id="area-status" class="area-status" aria-live="polite">Nenhuma área informada.</p>
+        </fieldset>
+
+        <div class="campos">
+          <label class="campo">
+            <span>Início do projeto</span>
+            <input type="date" id="data-inicio" required min="2000-01-01">
+          </label>
+          <label class="campo">
+            <span>Código do projeto <small>(opcional)</small></span>
+            <input type="text" id="codigo" maxlength="100" placeholder="ex.: VCS-1234" autocomplete="off">
+          </label>
+        </div>
+
+        <button type="submit" id="btn-analisar" class="btn-principal" disabled>Analisar área</button>
+        <p id="erro" class="erro" role="alert" hidden></p>
+      </form>
+
+      <section id="resultado" class="resultado" hidden aria-live="polite">
+        <div class="resumo">
+          <h2>Sinais encontrados</h2>
+          <p id="resumo-area"></p>
+        </div>
+        <ol id="sinais" class="sinais"></ol>
+        <ul id="avisos" class="avisos"></ul>
+        <button type="button" id="btn-link" class="btn-link">Copiar link desta análise</button>
+      </section>
+
+      <footer class="rodape">
+        <p>Sinais automáticos a partir de dados públicos. Não constituem conclusão sobre a regularidade do projeto.</p>
+        <p>Dados: INPE (DETER, PRODES, TIs), MMA (CNUC). Projetos de carbono desta demonstração são fictícios. <a href="https://github.com/EduardoMilani8/clareira">Código-fonte</a></p>
+      </footer>
+    </aside>
+
+    <div id="mapa" class="mapa" role="region" aria-label="Mapa de satélite"></div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.js"></script>
+  <script src="https://unpkg.com/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

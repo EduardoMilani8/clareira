@@ -34,6 +34,10 @@ Cada checagem vira **verde / amarelo / vermelho**, com hectares, percentual, o p
 | Unidades de Conservação | CNUC / MMA, dados.mma.gov.br | Shapefile | ago/2025 |
 | Projetos de carbono | **exemplos fictícios** criados para a demo | GeoJSON | — |
 
+Mapa: imagem de satélite Esri World Imagery (Esri, Maxar, Earthstar Geographics), via Leaflet,
+Leaflet-Geoman (desenho) e @tmcw/togeojson (leitura de KML). A data da imagem varia por região e pode ser
+anterior aos alertas mais recentes.
+
 Nota: o geoserver do FUNAI recusa downloads automáticos (HTTP 403), por isso usamos a camada de TIs
 que o INPE publica. Licenças: a confirmar antes da submissão.
 
@@ -47,7 +51,7 @@ uv sync
 uv run python scripts/ingest/todas.py      # baixa e carrega as bases (região padrão: Lábrea/AM)
 uv run python scripts/demo/gerar_areas.py  # (opcional) regera áreas de demo e projetos fictícios
 uv run pytest                              # unitários + integração (precisa do banco)
-uv run uvicorn clareira.api:app --reload   # API em http://localhost:8000 (docs em /docs)
+uv run uvicorn clareira.api:app --reload   # tela em http://localhost:8000 (API em /api, docs em /docs)
 ```
 
 ## API
@@ -86,6 +90,7 @@ src/clareira/
   ports.py          interfaces que o serviço precisa (repositório geográfico, análises)
   servico.py        caso de uso: valida a área, roda as 3 checagens, monta os sinais
   adapters/         PostGIS (consultas SQL das checagens)
-  api.py            FastAPI
+  api.py            FastAPI (também serve a tela e as áreas de demo)
+frontend/           tela única: Leaflet + desenho/upload + semáforo
 tests/              serviço com repositório falso, API, integração com PostGIS
 ```

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "clareira",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "uvicorn", "clareira.api:app", "--port", "8010", "--reload"],
+      "port": 8010
+    }
+  ]
+}

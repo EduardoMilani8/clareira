@@ -92,6 +92,9 @@ class ServicoAnalise:
     def fontes(self) -> list[Fonte]:
         return self.geo.fontes()
 
+    def cobertura(self) -> dict:
+        return self.geo.cobertura()
+
     @staticmethod
     def _sinal(
         tipo: TipoChecagem, s: Sobreposicao, area_ha: float, fontes: dict[str, Fonte]

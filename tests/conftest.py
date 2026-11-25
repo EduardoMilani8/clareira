@@ -29,7 +29,7 @@ class RepoFalso:
 
     def __init__(self, area_ha=1000.0, cobertura=1.0, desm=0.0, protegidas=0.0, projetos=0.0):
         self.area_ha = area_ha
-        self.cobertura = cobertura
+        self.frac_coberta = cobertura
         self.ha = {"desm": desm, "prot": protegidas, "proj": projetos}
         self.salvas: dict[str, Analise] = {}
         self.chamadas: list[tuple] = []
@@ -38,7 +38,7 @@ class RepoFalso:
         return geometria, self.area_ha
 
     def fracao_coberta(self, geometria):
-        return self.cobertura
+        return self.frac_coberta
 
     def _s(self, chave, rotulo):
         ha = self.ha[chave]
@@ -63,6 +63,14 @@ class RepoFalso:
             Fonte("cnuc", "CNUC", "https://exemplo", date(2025, 8, 1)),
             Fonte("exemplos", "Exemplos", "https://exemplo", None),
         ]
+
+    def cobertura(self):
+        return {
+            "type": "FeatureCollection",
+            "features": [
+                {"type": "Feature", "properties": {"nome": "Teste"}, "geometry": QUADRADO}
+            ],
+        }
 
     def salvar(self, analise):
         self.salvas[analise.id] = analise
