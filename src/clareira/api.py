@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import date
 from pathlib import Path
@@ -20,9 +21,7 @@ AVISO_LEGAL = (
     "Sinais automáticos a partir de dados públicos. "
     "Não constituem conclusão sobre a regularidade do projeto."
 )
-RAIZ = Path(__file__).resolve().parents[2]
-FRONTEND = RAIZ / "frontend"
-DEMO = RAIZ / "data" / "demo"
+PUBLICO = Path(__file__).resolve().parents[2] / "public"
 
 
 class PedidoAnalise(BaseModel):
@@ -81,19 +80,18 @@ def criar_app(servico: ServicoAnalise) -> FastAPI:
     def saude() -> dict:
         return {"ok": True}
 
-    if DEMO.is_dir():
-        app.mount("/demo", StaticFiles(directory=DEMO), name="demo")
-    if FRONTEND.is_dir():
-        app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")
+    # Na Vercel, public/ é servido pelo CDN e não deve ser montado aqui.
+    if PUBLICO.is_dir() and not os.environ.get("VERCEL"):
+        app.mount("/", StaticFiles(directory=PUBLICO, html=True), name="publico")
 
     return app
 
 
 def _app_padrao() -> FastAPI:
     from clareira.adapters.postgis import RepositorioPostgis
-    from clareira.config import Config
+    from clareira.config import Config, criar_engine
 
-    repo = RepositorioPostgis(Config().database_url)
+    repo = RepositorioPostgis(criar_engine(Config()))
     return criar_app(ServicoAnalise(repo, repo))
 
 

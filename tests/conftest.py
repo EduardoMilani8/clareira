@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 from datetime import date
 from pathlib import Path
 
@@ -9,7 +8,7 @@ import pytest
 
 from clareira.domain.modelos import Analise, Fonte, Item, Sobreposicao
 
-DEMO = Path(__file__).resolve().parents[1] / "data" / "demo"
+DEMO = Path(__file__).resolve().parents[1] / "public" / "demo"
 
 QUADRADO = {  # ~1.232 ha perto do equador
     "type": "Polygon",
@@ -88,9 +87,9 @@ def repo_falso():
 def repo_real():
     """PostGIS local com as bases carregadas; pula os testes se não estiver no ar."""
     from clareira.adapters.postgis import RepositorioPostgis
-    from clareira.config import Config
+    from clareira.config import criar_engine
 
-    repo = RepositorioPostgis(os.environ.get("DATABASE_URL", Config().database_url))
+    repo = RepositorioPostgis(criar_engine())
     from sqlalchemy.exc import OperationalError
 
     try:

@@ -6,3 +6,5 @@ __pycache__/
 .env
 # dados brutos baixados pelos scripts (reproduzíveis com scripts/ingest)
 data/raw/
+.env.*
+!.env.example

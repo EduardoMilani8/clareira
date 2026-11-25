@@ -13,14 +13,13 @@ from pathlib import Path
 
 import geopandas as gpd
 import httpx
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+
+from clareira.config import criar_engine
 
 RAIZ = Path(__file__).resolve().parents[2]
 DADOS = RAIZ / "data" / "raw"
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql+psycopg://clareira:clareira@localhost:5433/clareira"
-)
 # Região de demo: código IBGE do município. Padrão: Lábrea (AM).
 MUNICIPIO_IBGE = os.environ.get("CLAREIRA_MUNICIPIO_IBGE", "1302405")
 
@@ -37,7 +36,7 @@ class Fonte:
 
 
 def engine():
-    return create_engine(DATABASE_URL)
+    return criar_engine()
 
 
 def baixar(url: str, destino: Path, params: dict | None = None, forcar: bool = False) -> Path:

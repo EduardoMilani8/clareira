@@ -7,7 +7,7 @@ saída a cada execução).
     uv run python scripts/demo/gerar_areas.py
 
 Saídas:
-  data/demo/*.geojson                     áreas para testar na tela (upload)
+  public/demo/*.geojson                   áreas para testar na tela (upload)
   data/exemplos/projetos_carbono.geojson  "registro" fictício para a checagem de dupla contagem
 
 Nenhum desses projetos existe. Os códigos usam o prefixo EXEMPLO- de propósito.
@@ -101,7 +101,7 @@ def main() -> None:
     print("Áreas de demo")
     for arquivo, a in AREAS_DEMO.items():
         salvar(
-            RAIZ / "data" / "demo" / f"{arquivo}.geojson",
+            RAIZ / "public" / "demo" / f"{arquivo}.geojson",
             [feature(a["geom"], nome=a["nome"], data_inicio=a["data_inicio"], ficticio=True)],
         )
     print("Projetos fictícios")

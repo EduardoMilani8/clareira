@@ -54,15 +54,11 @@ wheels = [
 name = "clareira"
 version = "0.1.0"
 source = { editable = "." }
+default-groups = ["dev", "ingest"]
 dependencies = [
     { name = "fastapi" },
-    { name = "geoalchemy2" },
-    { name = "geopandas" },
-    { name = "httpx" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
-    { name = "pyogrio" },
-    { name = "pyproj" },
     { name = "shapely" },
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
@@ -70,20 +66,23 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "httpx" },
     { name = "pytest" },
     { name = "ruff" },
+]
+ingest = [
+    { name = "geoalchemy2" },
+    { name = "geopandas" },
+    { name = "httpx" },
+    { name = "pyogrio" },
+    { name = "pyproj" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.165.0" },
-    { name = "geoalchemy2", specifier = ">=0.21.0" },
-    { name = "geopandas", specifier = ">=1.2.0" },
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.9" },
     { name = "pydantic-settings", specifier = ">=2.16.3" },
-    { name = "pyogrio", specifier = ">=0.13.0" },
-    { name = "pyproj", specifier = ">=3.8.0" },
     { name = "shapely", specifier = ">=2.2.0" },
     { name = "sqlalchemy", specifier = ">=2.1.9" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
@@ -91,8 +90,16 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.6" },
+]
+ingest = [
+    { name = "geoalchemy2", specifier = ">=0.21.0" },
+    { name = "geopandas", specifier = ">=1.2.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pyogrio", specifier = ">=0.13.0" },
+    { name = "pyproj", specifier = ">=3.8.0" },
 ]
 
 [[package]]

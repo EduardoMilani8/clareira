@@ -66,9 +66,20 @@ uv run uvicorn clareira.api:app --reload   # tela em http://localhost:8000 (API 
 
 Para usar outra região, defina `CLAREIRA_MUNICIPIO_IBGE` com o código IBGE de um município da Amazônia Legal.
 
+## Deploy (Vercel + Neon)
+
+- `app.py` na raiz é o ponto de entrada da função; `public/` é servido pelo CDN da Vercel.
+- Banco: Neon com PostGIS. Para preparar o banco a partir da sua máquina, ponha a URL do Neon em
+  `.env.neon` (fora do git) e rode:
+
+```bash
+uv run --env-file .env.neon python scripts/db/migrar.py
+uv run --env-file .env.neon python scripts/ingest/todas.py
+```
+
 ## Áreas de demonstração
 
-Em `data/demo/` (Lábrea/AM). Use-as no upload da tela:
+Em `public/demo/` (Lábrea/AM). Use-as no upload da tela:
 
 | Arquivo | Data de início | Sinais esperados |
 |---|---|---|
@@ -84,13 +95,12 @@ Os projetos em `data/exemplos/projetos_carbono.geojson` são **fictícios** (pre
 db/init/            esquema PostGIS (roda na criação do container)
 scripts/ingest/     um script idempotente por base pública
 scripts/demo/       gerador das áreas de demo e dos projetos fictícios
-data/demo/          áreas de demonstração (GeoJSON)
 src/clareira/
   domain/           modelos e regras do semáforo (sem banco, sem HTTP)
   ports.py          interfaces que o serviço precisa (repositório geográfico, análises)
   servico.py        caso de uso: valida a área, roda as 3 checagens, monta os sinais
   adapters/         PostGIS (consultas SQL das checagens)
   api.py            FastAPI (também serve a tela e as áreas de demo)
-frontend/           tela única: Leaflet + desenho/upload + semáforo
+public/             tela única (Leaflet + desenho/upload + semáforo) e áreas de demo
 tests/              serviço com repositório falso, API, integração com PostGIS
 ```
