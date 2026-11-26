@@ -163,6 +163,7 @@
     el.sinais.replaceChildren(...a.sinais.map((s, i) => itemSinal(s, i)));
     el.avisos.replaceChildren(...a.avisos.map((t) => Object.assign(document.createElement("li"), { textContent: t })));
     el.resultado.hidden = false;
+    $("btn-relatorio").href = `relatorio.html?analise=${encodeURIComponent(a.id)}`;
 
     // desmatamento embaixo, sobreposições tracejadas por cima; dentro de cada grupo, vermelho no topo
     const ordem = { verde: 0, amarelo: 1, vermelho: 2 };

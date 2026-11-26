@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório Clareira</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='15' fill='%230F2A22'/><circle cx='16' cy='16' r='7' fill='%23E6EFE9'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    /* Relatório para imprimir/salvar em PDF: papel claro, A4, cores do semáforo com texto (não só cor). */
+    :root {
+      --copa: #0F2A22; --musgo: #1A3A30; --folha: #5d7a6e; --linha: #cfdcd5; --papel: #fff;
+      --fundo: #E6EFE9; --verde: #2E9E63; --amarelo: #C99A0E; --vermelho: #C8402B;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { background: var(--fundo); }
+    body {
+      margin: 0; font-family: "Archivo", system-ui, sans-serif; font-size: 10.5pt; line-height: 1.45;
+      color: var(--copa); background: var(--fundo);
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .barra {
+      display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      max-width: 210mm; margin: 0 auto; padding: 16px;
+    }
+    .barra a { color: var(--musgo); font-size: 14px; }
+    .barra button {
+      font: 600 15px/1 inherit; font-family: inherit; background: var(--copa); color: #fff; border: 0;
+      border-radius: 6px; padding: 12px 18px; cursor: pointer;
+    }
+    .barra button:focus-visible, .barra a:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+
+    .folha {
+      max-width: 210mm; margin: 0 auto 32px; background: var(--papel); padding: 16mm 16mm 12mm;
+      box-shadow: 0 1px 3px rgba(15, 42, 34, .15);
+    }
+    header.topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+      border-bottom: 2px solid var(--copa); padding-bottom: 10px; }
+    .marca { font-weight: 800; font-stretch: 112%; font-size: 22pt; letter-spacing: -.01em; margin: 0; line-height: 1; }
+    .topo p { margin: 4px 0 0; color: var(--folha); }
+    .topo p.marca { margin: 0; color: var(--copa); }
+    .meta-id { text-align: right; font-size: 9pt; color: var(--folha); }
+    h1 { font-size: 15pt; font-stretch: 100%; margin: 18px 0 6px; }
+    h2 { font-size: 11.5pt; margin: 18px 0 6px; }
+    h3 { font-size: 10pt; margin: 10px 0 4px; color: var(--musgo); }
+
+    dl.dados { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 16px; margin: 10px 0 14px; }
+    dl.dados div { border-left: 3px solid var(--linha); padding-left: 8px; }
+    dl.dados dt { font-size: 8.5pt; color: var(--folha); }
+    dl.dados dd { margin: 0; font-weight: 600; }
+
+    #mapa { width: 100%; height: 95mm; border: 1px solid var(--linha); background: #dfe8e3; }
+    .legenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 8.5pt; color: var(--folha); margin: 4px 0 0; }
+    .legenda i { display: inline-block; width: 14px; height: 10px; vertical-align: -1px; margin-right: 4px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+    th { font-size: 8.5pt; color: var(--folha); font-weight: 600; }
+    td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .nivel { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; white-space: nowrap; }
+    .nivel::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+    .nivel.verde { color: var(--verde); } .nivel.amarelo { color: var(--amarelo); } .nivel.vermelho { color: var(--vermelho); }
+
+    .sinal { break-inside: avoid; border-top: 1px solid var(--linha); padding-top: 4px; }
+    .sinal p { margin: 4px 0 2px; }
+    .sinal ul { margin: 0 0 6px; padding-left: 18px; }
+    .sinal li { margin: 1px 0; }
+    .sinal a { color: var(--musgo); }
+    .url { color: var(--folha); font-size: 8.5pt; word-break: break-all; }
+
+    .avisos { background: #fbf5e2; border-left: 3px solid var(--amarelo); padding: 6px 10px 6px 26px; margin: 12px 0 0; }
+    .metodo { font-size: 9pt; color: var(--musgo); }
+    .metodo p { margin: 4px 0; }
+    footer.aviso { margin-top: 16px; padding-top: 8px; border-top: 2px solid var(--copa); font-size: 9pt; }
+    footer.aviso strong { display: block; }
+    .estado { max-width: 210mm; margin: 40px auto; padding: 0 16px; font-size: 16px; }
+
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      html, body { background: #fff; }
+      .barra { display: none; }
+      .folha { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+      .leaflet-control-zoom { display: none; }
+      h2 { break-after: avoid; }
+    }
+    @media (max-width: 640px) {
+      .folha { padding: 16px; }
+      dl.dados { grid-template-columns: repeat(2, 1fr); }
+      header.topo { flex-direction: column; align-items: flex-start; }
+      .meta-id { text-align: left; }
+      #mapa { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="barra">
+    <a id="voltar" href="/">Voltar para a análise</a>
+    <button type="button" id="imprimir" disabled>Salvar em PDF</button>
+  </div>
+
+  <p class="estado" id="estado">Carregando a análise…</p>
+
+  <article class="folha" id="folha" hidden>
+    <header class="topo">
+      <div>
+        <p class="marca">Clareira</p>
+        <p>Sinais de risco de créditos de carbono a partir de dados públicos</p>
+      </div>
+      <div class="meta-id">
+        <div>Análise <span id="id"></span></div>
+        <div>Feita em <span id="criada"></span></div>
+      </div>
+    </header>
+
+    <h1>Relatório de sinais de risco da área do projeto</h1>
+    <dl class="dados">
+      <div><dt>Área analisada</dt><dd id="area"></dd></div>
+      <div><dt>Início do projeto</dt><dd id="inicio"></dd></div>
+      <div><dt>Código informado</dt><dd id="codigo"></dd></div>
+      <div><dt>Resultado geral</dt><dd id="geral"></dd></div>
+    </dl>
+
+    <div id="mapa" role="img" aria-label="Mapa de satélite com a área do projeto e as sobreposições encontradas"></div>
+    <p class="legenda">
+      <span><i style="border:2px solid #E6EFE9;background:#3b4f45"></i>Área do projeto</span>
+      <span><i style="background:rgba(200,64,43,.5)"></i>Desmatamento após o início</span>
+      <span><i style="border:2px dashed #C8402B"></i>Sobreposição com área protegida ou outro projeto</span>
+      <span>Imagem © Esri, Maxar, Earthstar Geographics</span>
+    </p>
+
+    <h2>Resumo das checagens</h2>
+    <table>
+      <thead><tr><th>Checagem</th><th>Sinal</th><th class="num">Área</th><th class="num">% da área</th></tr></thead>
+      <tbody id="resumo"></tbody>
+    </table>
+    <ul class="avisos" id="avisos" hidden></ul>
+
+    <h2>Detalhes e bases consultadas</h2>
+    <div id="detalhes"></div>
+
+    <h2>Como ler este relatório</h2>
+    <div class="metodo">
+      <p>A área do projeto foi cruzada com bases públicas de satélite e de cadastro. Cada checagem mede, em hectares
+        (projeção SIRGAS 2000 / Brazil Polyconic), quanto da área coincide com a base consultada. Áreas que aparecem em
+        mais de uma base são contadas uma vez só.</p>
+      <p><b>Sem sinal</b>: nada relevante encontrado (até 0,5 ha e 0,1% da área, margem para diferenças de borda).
+        <b>Sinal alto</b>: a partir de 1% da área para desmatamento e áreas protegidas, ou 5% para outro projeto de carbono.
+        <b>Sinal baixo</b>: entre os dois.</p>
+      <p>Os projetos de carbono desta demonstração são fictícios (códigos EXEMPLO-).</p>
+    </div>
+
+    <footer class="aviso">
+      <strong id="aviso-legal">Sinais automáticos a partir de dados públicos. Não constituem conclusão sobre a regularidade do projeto.</strong>
+      <span>Reabra esta análise em <span id="link" class="url"></span></span>
+    </footer>
+  </article>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  (() => {
+    "use strict";
+    const COR = { verde: "#2E9E63", amarelo: "#C99A0E", vermelho: "#C8402B" };
+    const NIVEL = { verde: "Sem sinal", amarelo: "Sinal baixo", vermelho: "Sinal alto" };
+    const ORDEM = { verde: 0, amarelo: 1, vermelho: 2 };
+    const ha = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+    const ha1 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+    const pct = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+    const fmtHa = (v) => `${v > 0 && v < 10 ? ha1.format(v) : ha.format(v)} ha`;
+    const fmtData = (iso) => (iso ? iso.slice(0, 10).split("-").reverse().join("/") : "não informada");
+    const $ = (id) => document.getElementById(id);
+    const no = (tag, texto, attrs = {}) => Object.assign(document.createElement(tag), { textContent: texto ?? "" }, attrs);
+    const nivel = (n) => no("span", NIVEL[n], { className: `nivel ${n}` });
+
+    const id = new URLSearchParams(location.search).get("analise");
+    if (!id) { $("estado").textContent = "Nenhuma análise informada. Faça uma análise na página inicial e use o botão “Baixar relatório”."; return; }
+    const linkAnalise = `${location.origin}/?analise=${encodeURIComponent(id)}`;
+    $("voltar").href = linkAnalise;
+
+    fetch(`/api/analises/${encodeURIComponent(id)}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(montar)
+      .catch(() => { $("estado").textContent = "Não encontramos esta análise. Volte à página inicial e faça uma nova."; });
+
+    function montar(a) {
+      document.title = `Relatório Clareira ${a.id.slice(0, 8)}`;
+      $("id").textContent = a.id.slice(0, 8);
+      $("criada").textContent = new Date(a.criada_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      $("area").textContent = fmtHa(a.area_ha);
+      $("inicio").textContent = fmtData(a.data_inicio);
+      $("codigo").textContent = a.codigo_projeto || "nenhum";
+      const pior = a.sinais.reduce((m, s) => (ORDEM[s.nivel] > ORDEM[m] ? s.nivel : m), "verde");
+      $("geral").replaceChildren(nivel(pior));
+      if (a.aviso_legal) $("aviso-legal").textContent = a.aviso_legal;
+      $("link").textContent = linkAnalise;
+
+      $("resumo").replaceChildren(...a.sinais.map((s) => {
+        const tr = document.createElement("tr");
+        const td = (conteudo, cls) => { const c = no("td", "", { className: cls || "" }); c.append(conteudo); return c; };
+        tr.append(td(s.titulo), td(nivel(s.nivel)), td(s.ha > 0 ? fmtHa(s.ha) : "0 ha", "num"),
+          td(s.ha > 0 ? `${pct.format(s.percentual)}%` : "0,0%", "num"));
+        return tr;
+      }));
+
+      if (a.avisos.length) {
+        $("avisos").replaceChildren(...a.avisos.map((t) => no("li", t)));
+        $("avisos").hidden = false;
+      }
+
+      $("detalhes").replaceChildren(...a.sinais.map((s) => {
+        const sec = no("section", "", { className: "sinal" });
+        const h = no("h3", `${s.titulo}: `);
+        h.append(nivel(s.nivel));
+        sec.append(h);
+        if (s.itens.length) {
+          sec.append(no("p", s.tipo === "desmatamento_pos_inicio" ? "Por ano de detecção:" : "Onde há sobreposição:"));
+          const ul = document.createElement("ul");
+          s.itens.forEach((it) => ul.append(no("li", `${it.rotulo}: ${fmtHa(it.ha)}`)));
+          sec.append(ul);
+        } else {
+          sec.append(no("p", "Nada encontrado nas bases consultadas."));
+        }
+        sec.append(no("p", "Bases consultadas:"));
+        const uf = document.createElement("ul");
+        s.fontes.forEach((f) => {
+          const li = document.createElement("li");
+          li.append(no("a", f.nome, { href: f.url }),
+            f.atualizado_em ? ` (dados até ${fmtData(f.atualizado_em)}) ` : " ", no("span", f.url, { className: "url" }));
+          uf.append(li);
+        });
+        sec.append(uf);
+        return sec;
+      }));
+
+      $("estado").hidden = true;
+      $("folha").hidden = false;
+      desenharMapa(a);
+    }
+
+    function desenharMapa(a) {
+      const mapa = L.map("mapa", {
+        zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false,
+        doubleClickZoom: false, boxZoom: false, keyboard: false, touchZoom: false, zoomSnap: 0.25,
+      });
+      const base = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 18 }).addTo(mapa);
+      const area = L.geoJSON(a.geometria, { style: { color: "#E6EFE9", weight: 2.5, fill: false } }).addTo(mapa);
+      [...a.sinais].sort((x, y) => (x.tipo === "desmatamento_pos_inicio" ? -1 : 1) - (y.tipo === "desmatamento_pos_inicio" ? -1 : 1))
+        .forEach((s) => {
+          if (!s.geometria || s.nivel === "verde") return;
+          const desm = s.tipo === "desmatamento_pos_inicio";
+          L.geoJSON(s.geometria, {
+            style: desm
+              ? { color: COR[s.nivel], weight: 1, fillColor: COR[s.nivel], fillOpacity: 0.55 }
+              : { color: COR[s.nivel], weight: 3, dashArray: "8 5", fill: false },
+          }).addTo(mapa);
+        });
+      mapa.fitBounds(area.getBounds(), { padding: [24, 24], maxZoom: 14 });
+      // Só libera o botão quando as imagens de satélite carregaram (ou após 6 s), para o PDF não sair com o mapa vazio.
+      let liberado = false;
+      const liberar = () => { if (!liberado) { liberado = true; $("imprimir").disabled = false; } };
+      base.on("load", liberar);
+      setTimeout(liberar, 6000);
+    }
+
+    $("imprimir").addEventListener("click", () => window.print());
+  })();
+  </script>
+</body>
+</html>

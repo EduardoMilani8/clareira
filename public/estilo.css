@@ -202,6 +202,9 @@ button, .btn-sec, input { font: inherit; color: inherit; }
   font-size: 14px;
 }
 .btn-link:hover { color: var(--liquen); }
+.acoes-resultado { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.acoes-resultado .btn-sec { color: var(--liquen); text-decoration: none; padding: 8px 14px; }
+.acoes-resultado .btn-sec:focus-visible { outline: 2px solid var(--liquen); outline-offset: 2px; }
 
 /* Um único momento de movimento: os sinais entram em sequência. */
 @keyframes surge { from { opacity: 0; transform: translateY(6px); } }
